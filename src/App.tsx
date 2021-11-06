@@ -21,6 +21,7 @@ export default function App() {
     []
   );
   const handleQueryChange = useCallback((value: string | undefined) => {
+    setSyntaxError(undefined);
     if (value) {
       setQuery(value);
     }
@@ -64,6 +65,11 @@ export default function App() {
         theme="vs-dark"
         onChange={handleQueryChange}
         onMount={handleQueryMount}
+        options={{
+          minimap: {
+            enabled: false,
+          },
+        }}
       />
       {syntaxError && syntaxError.toString()}
       <h2>Code</h2>
