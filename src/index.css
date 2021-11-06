@@ -19,9 +19,30 @@ body {
   margin: 0;
 }
 
-h1,
-h2 {
+header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+header aside {
+  display: flex;
+  flex-direction: row;
+}
+
+header aside a {
+  margin-left: 16px;
+  color: inherit;
+}
+
+h1 {
   font-size: 24px;
+}
+
+h2 {
+  font-size: 18px;
   margin: 16px;
 }
 
