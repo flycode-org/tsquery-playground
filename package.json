@@ -50,5 +50,12 @@
   },
   "devDependencies": {
     "react-app-rewired": "^2.1.8"
-  }
+  },
+  "homepage": "https://tsquery-playground.netlify.app",
+  "description": "Interactive playground for tsquery built with Monaco",
+  "bugs": {
+    "url": "https://github.com/iddan/tsquery-playground/issues"
+  },
+  "repository": "https://github.com/iddan/tsquery-playground.git",
+  "author": "Iddan Aaronsohn <mail@aniddan.com>"
 }
