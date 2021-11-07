@@ -40,7 +40,8 @@ export default function App() {
     setHighlighted([]);
     try {
       const ast = tsquery.ast(code, undefined, ScriptKind.JSX);
-      const nodes = tsquery(ast, query);
+      const sanitizedQuery = query.replace(/\n/g, " ").replace(/,\s*$/, "").trim();
+      const nodes = tsquery(ast, sanitizedQuery);
       setHighlighted(
         nodes.map((node) => {
           /** @todo resolve column */
