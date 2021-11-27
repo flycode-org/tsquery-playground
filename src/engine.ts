@@ -18,19 +18,14 @@ const REG_EXPS: Record<string, RegExp> = {
 
 export function queryCode(code: string, query: string): Node[] {
   const ast = tsquery.ast(code, undefined, ScriptKind.JSX);
-  const sanitizedQuery = query
-    .replace(REG_EXPS.AllLineBreaks, ' ')
-    .replace(REG_EXPS.TrailingCommaAndWhitespace, '')
-    .trim();
-
+  const sanitizedQuery = sanitizeQuery(query);
   const nodes = tsquery(ast, sanitizedQuery);
-  const nonEmptyNodes = nodes.filter((node) => {
-    const nodeText = getNodeText(node);
-
-    return !isWhitespaceOnly(nodeText);
-  });
-
+  const nonEmptyNodes = nodes.filter((node) => !isWhitespaceOnlyNode(node));
   return nonEmptyNodes;
+}
+
+function sanitizeQuery(query: string): string {
+  return query.replace(REG_EXPS.AllLineBreaks, ' ').replace(REG_EXPS.TrailingCommaAndWhitespace, '').trim();
 }
 
 function isNodeWithText<TNode extends Node>(node: Node): node is TNode & NodeWithText {
@@ -43,6 +38,11 @@ function getNodeText(node: Node): string {
   }
 
   return node.getFullText();
+}
+
+function isWhitespaceOnlyNode(node: Node): boolean {
+  const nodeText = getNodeText(node);
+  return isWhitespaceOnly(nodeText);
 }
 
 function isWhitespaceOnly(text: string): boolean {
