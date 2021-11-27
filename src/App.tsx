@@ -1,18 +1,11 @@
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import Editor, { OnChange } from '@monaco-editor/react';
-import type * as Monaco from 'monaco-editor';
-import { Node, ScriptKind } from 'typescript';
-import { tsquery } from '@phenomnomnominal/tsquery';
+import { useCallback, useEffect, useState } from 'react';
+import { Node } from 'typescript';
 import './index.css';
+import { queryCode } from './engine';
+import QueryEditor from './QueryEditor';
+import Code, { HighlightedInterval, HighlightedIntervals } from './Code';
 
-type HighlightedInterval = {
-  startOffset: number;
-  endOffset: number;
-};
-
-type HighlightedIntervals = Array<HighlightedInterval>;
-
-const RegExps = {
+const REG_EXPS: Record<string, RegExp> = {
   AllLineBreaks: /\n/g,
 
   LeadingWhitespace: /^\s+/,
@@ -23,18 +16,10 @@ const RegExps = {
 };
 
 export default function App() {
-  // State
   const [highlightedIntervals, setHighlightedIntervals] = useState<HighlightedIntervals>([]);
   const [query, setQuery] = useState<string>('');
   const [code, setCode] = useState<string>('');
   const [syntaxError, setSyntaxError] = useState<Error>();
-
-  // Handlers
-  const handleQueryMount = useCallback((editor: Monaco.editor.IStandaloneCodeEditor, monaco: typeof Monaco) => {
-    monaco.languages.css.cssDefaults.setOptions({
-      validate: false,
-    });
-  }, []);
 
   const handleQueryChange = useCallback((value: string | undefined) => {
     setSyntaxError(undefined);
@@ -49,7 +34,6 @@ export default function App() {
     }
   }, []);
 
-  // Effects
   useEffect(() => {
     if (!query) {
       return;
@@ -58,35 +42,12 @@ export default function App() {
     setHighlightedIntervals([]);
 
     try {
-      const ast = tsquery.ast(code, undefined, ScriptKind.JSX);
-      const sanitizedQuery = query
-        .replace(RegExps.AllLineBreaks, ' ')
-        .replace(RegExps.TrailingCommaAndWhitespace, '')
-        .trim();
-
-      const nodes = tsquery(ast, sanitizedQuery);
-      const nonEmptyNodes = nodes.filter((node) => {
-        const nodeText = getNodeText(node);
-
-        return !isWhitespaceOnly(nodeText);
-      });
-
-      setHighlightedIntervals(
-        nonEmptyNodes.map((node) => {
-          const fullText = node.getFullText();
-          const leadingWhitespaceOffset = getFirstMatchLengthOrZero(fullText, RegExps.LeadingWhitespace);
-          const trailingWhitespaceOffset = getFirstMatchLengthOrZero(fullText, RegExps.TrailingWhitespace);
-
-          /** @todo resolve column */
-          return {
-            startOffset: node.pos + leadingWhitespaceOffset,
-            endOffset: node.end - trailingWhitespaceOffset,
-          };
-        }),
-      );
+      const nodes = queryCode(code, query);
+      const highlightedIntervals = nodes.map((node) => mapNodeToHighlightInterval(node));
+      setHighlightedIntervals(highlightedIntervals);
     } catch (error) {
-      if ((error as { name: string }).name === 'SyntaxError') {
-        setSyntaxError(error as Error);
+      if (isSyntaxError(error)) {
+        setSyntaxError(error);
         return;
       }
       throw error;
@@ -104,17 +65,7 @@ export default function App() {
         </aside>
       </header>
       <h2>Query</h2>
-      <Editor
-        defaultLanguage="css"
-        theme="vs-dark"
-        onChange={handleQueryChange}
-        onMount={handleQueryMount}
-        options={{
-          minimap: {
-            enabled: false,
-          },
-        }}
-      />
+      <QueryEditor onChange={handleQueryChange} />
       {syntaxError && syntaxError.toString()}
       <h2>Code</h2>
       <Code highlighted={highlightedIntervals} onChange={handleCodeChange} />
@@ -122,78 +73,20 @@ export default function App() {
   );
 }
 
-const Code: FC<{
-  highlighted: HighlightedIntervals;
-  onChange: OnChange;
-}> = ({ highlighted, onChange }) => {
-  const [instances, setInstances] = useState<[Monaco.editor.IStandaloneCodeEditor, typeof Monaco] | null>(null);
-
-  /** @todo https://microsoft.github.io/monaco-editor/api/modules/monaco.editor.html#setmodelmarkers */
-  const decorationsRef = useRef<string[]>([]);
-  const handleMount = useCallback((editor: Monaco.editor.IStandaloneCodeEditor, monaco: typeof Monaco) => {
-    setInstances([editor, monaco]);
-    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-      jsx: monaco.languages.typescript.JsxEmit.React,
-    });
-    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-      noSemanticValidation: true,
-      noSuggestionDiagnostics: true,
-      noSyntaxValidation: true,
-    });
-  }, []);
-
-  const handleChange = useCallback(
-    (value: string | undefined, ev: Monaco.editor.IModelContentChangedEvent) => {
-      onChange(value, ev);
-    },
-    [onChange],
-  );
-
-  useEffect(() => {
-    if (!instances) {
-      return;
-    }
-    const [editor, monaco] = instances;
-
-    const model = editor.getModel();
-    if (!model) {
-      return;
-    }
-
-    const newDecorations = highlighted.map(({ startOffset, endOffset }) => {
-      const start = model.getPositionAt(startOffset);
-      const end = model.getPositionAt(endOffset);
-
-      return {
-        range: new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column),
-        options: {
-          inlineClassName: 'highlighted',
-        },
-      };
-    });
-    decorationsRef.current = editor.deltaDecorations(decorationsRef.current, newDecorations);
-  }, [instances, highlighted]);
-  return <Editor defaultLanguage="typescript" theme="vs-dark" onMount={handleMount} onChange={handleChange} />;
-};
-
-type NodeWithText = Node & {
-  text: string;
-};
-
-function isNodeWithText<TNode extends Node>(node: Node): node is TNode & NodeWithText {
-  return (node as TNode & NodeWithText).text != null;
+function isSyntaxError(error: unknown): error is Error & { name: 'SyntaxError' } {
+  return (error as { name: string }).name === 'SyntaxError';
 }
 
-function getNodeText(node: Node): string {
-  if (isNodeWithText(node)) {
-    return node.text;
-  }
+function mapNodeToHighlightInterval(node: Node): HighlightedInterval {
+  const fullText = node.getFullText();
+  const leadingWhitespaceOffset = getFirstMatchLengthOrZero(fullText, REG_EXPS.LeadingWhitespace);
+  const trailingWhitespaceOffset = getFirstMatchLengthOrZero(fullText, REG_EXPS.TrailingWhitespace);
 
-  return node.getFullText();
-}
-
-function isWhitespaceOnly(text: string): boolean {
-  return RegExps.OnlyWhitespace.test(text);
+  /** @todo resolve column */
+  return {
+    startOffset: node.pos + leadingWhitespaceOffset,
+    endOffset: node.end - trailingWhitespaceOffset,
+  };
 }
 
 function getFirstMatchLengthOrZero(text: string, regExp: RegExp): number {
