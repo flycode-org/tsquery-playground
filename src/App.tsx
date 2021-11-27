@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { Node } from 'typescript';
 import './index.css';
 import { queryCode } from './engine';
 import QueryEditor from './QueryEditor';
 import Code, { HighlightedInterval, HighlightedIntervals } from './Code';
 import { isSyntaxError } from './tsquery-util';
+import Header from './Header';
 
 const REG_EXPS: Record<string, RegExp> = {
   AllLineBreaks: /\n/g,
@@ -16,7 +17,7 @@ const REG_EXPS: Record<string, RegExp> = {
   OnlyWhitespace: /^\s*$/,
 };
 
-export default function App() {
+const App: FC = () => {
   const [highlightedIntervals, setHighlightedIntervals] = useState<HighlightedIntervals>([]);
   const [query, setQuery] = useState<string>('');
   const [code, setCode] = useState<string>('');
@@ -54,20 +55,16 @@ export default function App() {
   // Layout
   return (
     <div className="App">
-      <header>
-        <h1>TSQuery Playground</h1>
-        <aside>
-          <a href="https://github.com/phenomnomnominal/tsquery#selectors">Reference</a>
-          <a href="https://github.com/flycode-org/tsquery-playground">GitHub</a>
-        </aside>
-      </header>
+      <Header />
       <h2>Query</h2>
       <QueryEditor onChange={handleQueryChange} />
       <h2>Code</h2>
       <Code highlighted={highlightedIntervals} onChange={handleCodeChange} />
     </div>
   );
-}
+};
+
+export default App;
 
 function mapNodeToHighlightInterval(node: Node): HighlightedInterval {
   const fullText = node.getFullText();

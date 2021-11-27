@@ -9,10 +9,12 @@ export type HighlightedInterval = {
 
 export type HighlightedIntervals = HighlightedInterval[];
 
-const Code: FC<{
+export type CodeProps = {
   highlighted: HighlightedIntervals;
   onChange: OnChange;
-}> = ({ highlighted, onChange }) => {
+};
+
+const Code: FC<CodeProps> = ({ highlighted, onChange }) => {
   const [instances, setInstances] = useState<[Monaco.editor.IStandaloneCodeEditor, typeof Monaco] | null>(null);
 
   /** @todo https://microsoft.github.io/monaco-editor/api/modules/monaco.editor.html#setmodelmarkers */

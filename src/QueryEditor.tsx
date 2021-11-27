@@ -7,10 +7,9 @@ import { isSyntaxError } from './tsquery-util';
 
 const MONACO_MODEL_MARKER_OWNER = 'tsquery';
 
-const QueryEditor: FC<Omit<EditorProps, 'defaultLanguage' | 'theme' | 'options' | 'onMount'>> = ({
-  onChange,
-  ...rest
-}) => {
+export type QueryEditorProps = Omit<EditorProps, 'defaultLanguage' | 'theme' | 'options' | 'onMount'>;
+
+const QueryEditor: FC<QueryEditorProps> = ({ onChange, ...rest }) => {
   const monacoRef = useRef<typeof Monaco>();
   const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor>();
   const handleQueryMount = useCallback((editor: Monaco.editor.IStandaloneCodeEditor, monaco: typeof Monaco) => {
