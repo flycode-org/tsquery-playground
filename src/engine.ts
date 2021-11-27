@@ -24,7 +24,7 @@ export function queryCode(code: string, query: string): Node[] {
   return nonEmptyNodes;
 }
 
-function sanitizeQuery(query: string): string {
+export function sanitizeQuery(query: string): string {
   return query.replace(REG_EXPS.AllLineBreaks, ' ').replace(REG_EXPS.TrailingCommaAndWhitespace, '').trim();
 }
 

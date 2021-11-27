@@ -19,10 +19,8 @@ export default function App() {
   const [highlightedIntervals, setHighlightedIntervals] = useState<HighlightedIntervals>([]);
   const [query, setQuery] = useState<string>('');
   const [code, setCode] = useState<string>('');
-  const [syntaxError, setSyntaxError] = useState<Error>();
 
   const handleQueryChange = useCallback((value: string | undefined) => {
-    setSyntaxError(undefined);
     if (value) {
       setQuery(value);
     }
@@ -38,7 +36,6 @@ export default function App() {
     if (!query) {
       return;
     }
-    setSyntaxError(undefined);
     setHighlightedIntervals([]);
 
     try {
@@ -46,8 +43,7 @@ export default function App() {
       const highlightedIntervals = nodes.map((node) => mapNodeToHighlightInterval(node));
       setHighlightedIntervals(highlightedIntervals);
     } catch (error) {
-      if (isSyntaxError(error)) {
-        setSyntaxError(error);
+      if (error instanceof SyntaxError) {
         return;
       }
       throw error;
@@ -66,15 +62,10 @@ export default function App() {
       </header>
       <h2>Query</h2>
       <QueryEditor onChange={handleQueryChange} />
-      {syntaxError && syntaxError.toString()}
       <h2>Code</h2>
       <Code highlighted={highlightedIntervals} onChange={handleCodeChange} />
     </div>
   );
-}
-
-function isSyntaxError(error: unknown): error is Error & { name: 'SyntaxError' } {
-  return (error as { name: string }).name === 'SyntaxError';
 }
 
 function mapNodeToHighlightInterval(node: Node): HighlightedInterval {
