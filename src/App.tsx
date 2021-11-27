@@ -1,16 +1,16 @@
-import { FC, useCallback, useEffect, useRef, useState } from "react";
-import Editor, { OnChange } from "@monaco-editor/react";
-import type * as Monaco from "monaco-editor";
-import { ScriptKind } from "typescript";
-import { tsquery } from "@phenomnomnominal/tsquery";
-import "./index.css";
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import Editor, { OnChange } from '@monaco-editor/react';
+import type * as Monaco from 'monaco-editor';
+import { ScriptKind } from 'typescript';
+import { tsquery } from '@phenomnomnominal/tsquery';
+import './index.css';
 
 type Highlighted = Array<[number, number]>;
 
 export default function App() {
   const [highlighted, setHighlighted] = useState<Highlighted>([]);
-  const [query, setQuery] = useState<string>("");
-  const [code, setCode] = useState<string>("");
+  const [query, setQuery] = useState<string>('');
+  const [code, setCode] = useState<string>('');
   const [syntaxError, setSyntaxError] = useState<Error>();
   const handleQueryMount = useCallback(
     (editor: Monaco.editor.IStandaloneCodeEditor, monaco: typeof Monaco) => {
@@ -18,7 +18,7 @@ export default function App() {
         validate: false,
       });
     },
-    []
+    [],
   );
   const handleQueryChange = useCallback((value: string | undefined) => {
     setSyntaxError(undefined);
@@ -40,16 +40,19 @@ export default function App() {
     setHighlighted([]);
     try {
       const ast = tsquery.ast(code, undefined, ScriptKind.JSX);
-      const sanitizedQuery = query.replace(/\n/g, " ").replace(/,\s*$/, "").trim();
+      const sanitizedQuery = query
+        .replace(/\n/g, ' ')
+        .replace(/,\s*$/, '')
+        .trim();
       const nodes = tsquery(ast, sanitizedQuery);
       setHighlighted(
         nodes.map((node) => {
           /** @todo resolve column */
           return [node.pos, node.end];
-        })
+        }),
       );
     } catch (error) {
-      if ((error as { name: string }).name === "SyntaxError") {
+      if ((error as { name: string }).name === 'SyntaxError') {
         setSyntaxError(error as Error);
         return;
       }
@@ -108,16 +111,16 @@ const Code: FC<{
         noSyntaxValidation: true,
       });
     },
-    []
+    [],
   );
   const handleChange = useCallback(
     (
       value: string | undefined,
-      ev: Monaco.editor.IModelContentChangedEvent
+      ev: Monaco.editor.IModelContentChangedEvent,
     ) => {
       onChange(value, ev);
     },
-    [onChange]
+    [onChange],
   );
   useEffect(() => {
     if (!instances) {
@@ -139,16 +142,16 @@ const Code: FC<{
           start.lineNumber,
           start.column,
           end.lineNumber,
-          end.column
+          end.column,
         ),
         options: {
-          inlineClassName: "highlighted",
+          inlineClassName: 'highlighted',
         },
       };
     });
     decorationsRef.current = editor.deltaDecorations(
       decorationsRef.current,
-      newDecorations
+      newDecorations,
     );
   }, [instances, highlighted]);
   return (
