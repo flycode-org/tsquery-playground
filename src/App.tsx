@@ -82,7 +82,6 @@ function mapNodeToHighlightInterval(node: Node): HighlightedInterval {
   const leadingWhitespaceOffset = getFirstMatchLengthOrZero(fullText, REG_EXPS.LeadingWhitespace);
   const trailingWhitespaceOffset = getFirstMatchLengthOrZero(fullText, REG_EXPS.TrailingWhitespace);
 
-  /** @todo resolve column */
   return {
     startOffset: node.pos + leadingWhitespaceOffset,
     endOffset: node.end - trailingWhitespaceOffset,
