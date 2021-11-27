@@ -1,11 +1,16 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import Editor, { OnChange } from '@monaco-editor/react';
 import type * as Monaco from 'monaco-editor';
-import { Node, ScriptKind, SyntaxKind } from 'typescript';
+import { Node, ScriptKind } from 'typescript';
 import { tsquery } from '@phenomnomnominal/tsquery';
 import './index.css';
 
-type Highlighted = Array<[number, number]>;
+type HighlightedInterval = {
+  startOffset: number;
+  endOffset: number;
+};
+
+type HighlightedIntervals = Array<HighlightedInterval>;
 
 const RegExps = {
   AllLineBreaks: /\n/g,
@@ -19,7 +24,7 @@ const RegExps = {
 
 export default function App() {
   // State
-  const [highlighted, setHighlighted] = useState<Highlighted>([]);
+  const [highlightedIntervals, setHighlightedIntervals] = useState<HighlightedIntervals>([]);
   const [query, setQuery] = useState<string>('');
   const [code, setCode] = useState<string>('');
   const [syntaxError, setSyntaxError] = useState<Error>();
@@ -50,7 +55,7 @@ export default function App() {
       return;
     }
     setSyntaxError(undefined);
-    setHighlighted([]);
+    setHighlightedIntervals([]);
 
     try {
       const ast = tsquery.ast(code, undefined, ScriptKind.JSX);
@@ -66,21 +71,16 @@ export default function App() {
         return !isWhitespaceOnly(nodeText);
       });
 
-      setHighlighted(
+      setHighlightedIntervals(
         nonEmptyNodes.map((node) => {
-          let startOffset: number;
-          let endOffset: number;
-
-          if (node.kind === SyntaxKind.JsxText && isNodeWithText(node)) {
-            startOffset = getFirstMatchLengthOrZero(node.text, RegExps.LeadingWhitespace);
-            endOffset = getFirstMatchLengthOrZero(node.text, RegExps.TrailingWhitespace);
-          } else {
-            startOffset = getFirstMatchLengthOrZero(node.getFullText(), RegExps.LeadingWhitespace);
-            endOffset = getFirstMatchLengthOrZero(node.getFullText(), RegExps.TrailingWhitespace);
-          }
+          const leadingWhitespaceOffset = getFirstMatchLengthOrZero(node.getFullText(), RegExps.LeadingWhitespace);
+          const trailingWhitespaceOffset = getFirstMatchLengthOrZero(node.getFullText(), RegExps.TrailingWhitespace);
 
           /** @todo resolve column */
-          return [node.pos + startOffset, node.end - endOffset];
+          return {
+            startOffset: node.pos + leadingWhitespaceOffset,
+            endOffset: node.end - trailingWhitespaceOffset,
+          };
         }),
       );
     } catch (error) {
@@ -116,13 +116,13 @@ export default function App() {
       />
       {syntaxError && syntaxError.toString()}
       <h2>Code</h2>
-      <Code highlighted={highlighted} onChange={handleCodeChange} />
+      <Code highlighted={highlightedIntervals} onChange={handleCodeChange} />
     </div>
   );
 }
 
 const Code: FC<{
-  highlighted: Highlighted;
+  highlighted: HighlightedIntervals;
   onChange: OnChange;
 }> = ({ highlighted, onChange }) => {
   const [instances, setInstances] = useState<[Monaco.editor.IStandaloneCodeEditor, typeof Monaco] | null>(null);
@@ -159,9 +159,10 @@ const Code: FC<{
       return;
     }
 
-    const newDecorations = highlighted.map(([startOffset, endOffset]) => {
+    const newDecorations = highlighted.map(({ startOffset, endOffset }) => {
       const start = model.getPositionAt(startOffset);
       const end = model.getPositionAt(endOffset);
+
       return {
         range: new monaco.Range(start.lineNumber, start.column, end.lineNumber, end.column),
         options: {
