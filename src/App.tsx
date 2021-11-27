@@ -99,7 +99,7 @@ export default function App() {
         <h1>TSQuery Playground</h1>
         <aside>
           <a href="https://github.com/phenomnomnominal/tsquery#selectors">Reference</a>
-          <a href="https://github.com/iddan/tsquery-playground">GitHub</a>
+          <a href="https://github.com/flycode-org/tsquery-playground">GitHub</a>
         </aside>
       </header>
       <h2>Query</h2>
