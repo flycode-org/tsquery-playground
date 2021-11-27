@@ -73,8 +73,9 @@ export default function App() {
 
       setHighlightedIntervals(
         nonEmptyNodes.map((node) => {
-          const leadingWhitespaceOffset = getFirstMatchLengthOrZero(node.getFullText(), RegExps.LeadingWhitespace);
-          const trailingWhitespaceOffset = getFirstMatchLengthOrZero(node.getFullText(), RegExps.TrailingWhitespace);
+          const fullText = node.getFullText();
+          const leadingWhitespaceOffset = getFirstMatchLengthOrZero(fullText, RegExps.LeadingWhitespace);
+          const trailingWhitespaceOffset = getFirstMatchLengthOrZero(fullText, RegExps.TrailingWhitespace);
 
           /** @todo resolve column */
           return {
@@ -183,7 +184,7 @@ function isNodeWithText<TNode extends Node>(node: Node): node is TNode & NodeWit
   return (node as TNode & NodeWithText).text != null;
 }
 
-function getNodeText(node: Node) {
+function getNodeText(node: Node): string {
   if (isNodeWithText(node)) {
     return node.text;
   }
@@ -191,16 +192,16 @@ function getNodeText(node: Node) {
   return node.getFullText();
 }
 
-function isWhitespaceOnly(text: string) {
+function isWhitespaceOnly(text: string): boolean {
   return RegExps.OnlyWhitespace.test(text);
 }
 
-function getFirstMatchLengthOrZero(text: string, regExp: RegExp) {
+function getFirstMatchLengthOrZero(text: string, regExp: RegExp): number {
   const firstMatch = getFirstMatchOrNull(text, regExp);
   return firstMatch != null ? firstMatch.length : 0;
 }
 
-function getFirstMatchOrNull(text: string, regExp: RegExp) {
+function getFirstMatchOrNull(text: string, regExp: RegExp): string | null {
   const matches = text.match(regExp);
   if (!matches || matches.length === 0) {
     return null;
