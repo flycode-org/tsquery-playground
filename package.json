@@ -15,12 +15,12 @@
     "@types/react-dom": "^17.0.0",
     "esquery": "^1.4.0",
     "monaco-editor": "^0.30.0",
+    "prettier": "^2.3.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "^4.0.3",
     "typescript": "^4.5.2",
-    "web-vitals": "^1.0.1",
-    "prettier": "^2.3.2"
+    "web-vitals": "^1.0.1"
   },
   "scripts": {
     "start": "react-app-rewired start",
