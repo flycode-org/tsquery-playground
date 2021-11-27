@@ -4,6 +4,7 @@ import './index.css';
 import { queryCode } from './engine';
 import QueryEditor from './QueryEditor';
 import Code, { HighlightedInterval, HighlightedIntervals } from './Code';
+import { isSyntaxError } from './tsquery-util';
 
 const REG_EXPS: Record<string, RegExp> = {
   AllLineBreaks: /\n/g,
@@ -43,7 +44,7 @@ export default function App() {
       const highlightedIntervals = nodes.map((node) => mapNodeToHighlightInterval(node));
       setHighlightedIntervals(highlightedIntervals);
     } catch (error) {
-      if (error instanceof SyntaxError) {
+      if (isSyntaxError(error)) {
         return;
       }
       throw error;

@@ -3,6 +3,7 @@ import Editor, { EditorProps } from '@monaco-editor/react';
 import type * as Monaco from 'monaco-editor';
 import { tsquery } from '@phenomnomnominal/tsquery';
 import { sanitizeQuery } from './engine';
+import { isSyntaxError } from './tsquery-util';
 
 const MONACO_MODEL_MARKER_OWNER = 'tsquery';
 
@@ -73,7 +74,7 @@ function getSyntaxError(query: string): Error | null {
     tsquery.parse(query);
     return null;
   } catch (error) {
-    if (error instanceof SyntaxError) {
+    if (isSyntaxError(error)) {
       return error;
     }
     throw error;
