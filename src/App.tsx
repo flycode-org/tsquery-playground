@@ -1,17 +1,30 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import Editor, { OnChange } from '@monaco-editor/react';
 import type * as Monaco from 'monaco-editor';
-import { ScriptKind } from 'typescript';
+import { Node, ScriptKind, SyntaxKind } from 'typescript';
 import { tsquery } from '@phenomnomnominal/tsquery';
 import './index.css';
 
 type Highlighted = Array<[number, number]>;
 
+const RegExps = {
+  AllLineBreaks: /\n/g,
+
+  LeadingWhitespace: /^\s+/,
+  TrailingWhitespace: /\s+$/,
+  TrailingCommaAndWhitespace: /,\s*$/,
+
+  OnlyWhitespace: /^\s*$/,
+};
+
 export default function App() {
+  // State
   const [highlighted, setHighlighted] = useState<Highlighted>([]);
   const [query, setQuery] = useState<string>('');
   const [code, setCode] = useState<string>('');
   const [syntaxError, setSyntaxError] = useState<Error>();
+
+  // Handlers
   const handleQueryMount = useCallback(
     (editor: Monaco.editor.IStandaloneCodeEditor, monaco: typeof Monaco) => {
       monaco.languages.css.cssDefaults.setOptions({
@@ -20,35 +33,69 @@ export default function App() {
     },
     [],
   );
+
   const handleQueryChange = useCallback((value: string | undefined) => {
     setSyntaxError(undefined);
     if (value) {
       setQuery(value);
     }
   }, []);
+
   const handleCodeChange = useCallback((value: string | undefined) => {
     if (value) {
       setCode(value);
     }
   }, []);
 
+  // Effects
   useEffect(() => {
     if (!query) {
       return;
     }
     setSyntaxError(undefined);
     setHighlighted([]);
+
     try {
       const ast = tsquery.ast(code, undefined, ScriptKind.JSX);
       const sanitizedQuery = query
-        .replace(/\n/g, ' ')
-        .replace(/,\s*$/, '')
+        .replace(RegExps.AllLineBreaks, ' ')
+        .replace(RegExps.TrailingCommaAndWhitespace, '')
         .trim();
+
       const nodes = tsquery(ast, sanitizedQuery);
+      const nonEmptyNodes = nodes.filter((node) => {
+        const nodeText = getNodeText(node);
+
+        return !isWhitespaceOnly(nodeText);
+      });
+
       setHighlighted(
-        nodes.map((node) => {
+        nonEmptyNodes.map((node) => {
+          let startOffset: number;
+          let endOffset: number;
+
+          if (node.kind === SyntaxKind.JsxText && isNodeWithText(node)) {
+            startOffset = getFirstMatchLengthOrZero(
+              node.text,
+              RegExps.LeadingWhitespace,
+            );
+            endOffset = getFirstMatchLengthOrZero(
+              node.text,
+              RegExps.TrailingWhitespace,
+            );
+          } else {
+            startOffset = getFirstMatchLengthOrZero(
+              node.getFullText(),
+              RegExps.LeadingWhitespace,
+            );
+            endOffset = getFirstMatchLengthOrZero(
+              node.getFullText(),
+              RegExps.TrailingWhitespace,
+            );
+          }
+
           /** @todo resolve column */
-          return [node.pos, node.end];
+          return [node.pos + startOffset, node.end - endOffset];
         }),
       );
     } catch (error) {
@@ -60,6 +107,7 @@ export default function App() {
     }
   }, [query, code]);
 
+  // Layout
   return (
     <div className="App">
       <header>
@@ -97,6 +145,7 @@ const Code: FC<{
   const [instances, setInstances] = useState<
     [Monaco.editor.IStandaloneCodeEditor, typeof Monaco] | null
   >(null);
+
   /** @todo https://microsoft.github.io/monaco-editor/api/modules/monaco.editor.html#setmodelmarkers */
   const decorationsRef = useRef<string[]>([]);
   const handleMount = useCallback(
@@ -113,6 +162,7 @@ const Code: FC<{
     },
     [],
   );
+
   const handleChange = useCallback(
     (
       value: string | undefined,
@@ -122,6 +172,7 @@ const Code: FC<{
     },
     [onChange],
   );
+
   useEffect(() => {
     if (!instances) {
       return;
@@ -129,7 +180,6 @@ const Code: FC<{
     const [editor, monaco] = instances;
 
     const model = editor.getModel();
-
     if (!model) {
       return;
     }
@@ -163,3 +213,39 @@ const Code: FC<{
     />
   );
 };
+
+type NodeWithText = Node & {
+  text: string;
+};
+
+function isNodeWithText<TNode extends Node>(
+  node: Node,
+): node is TNode & NodeWithText {
+  return (node as TNode & NodeWithText).text != null;
+}
+
+function getNodeText(node: Node) {
+  if (isNodeWithText(node)) {
+    return node.text;
+  }
+
+  return node.getFullText();
+}
+
+function isWhitespaceOnly(text: string) {
+  return RegExps.OnlyWhitespace.test(text);
+}
+
+function getFirstMatchLengthOrZero(text: string, regExp: RegExp) {
+  const firstMatch = getFirstMatchOrNull(text, regExp);
+  return firstMatch != null ? firstMatch.length : 0;
+}
+
+function getFirstMatchOrNull(text: string, regExp: RegExp) {
+  const matches = text.match(regExp);
+  if (!matches || matches.length === 0) {
+    return null;
+  }
+
+  return matches[0];
+}
