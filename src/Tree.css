@@ -1,0 +1,36 @@
+.toggable {
+  position: relative;
+}
+
+.toggable::before {
+  content: '+';
+  color: lightgreen;
+  position: absolute;
+  left: -10px;
+}
+
+.toggable.open::before {
+  content: '-';
+  color: pink;
+}
+
+.nc {
+  color: lightblue;
+}
+
+.nc:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.nb {
+  color: orange;
+}
+
+.p {
+  color: gray;
+}
+
+.s {
+  color: lightcyan;
+}

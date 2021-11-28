@@ -1,11 +1,13 @@
 import { FC, useCallback, useEffect, useState } from 'react';
-import { Node } from 'typescript';
+import { Node, ScriptKind } from 'typescript';
+import { tsquery } from '@phenomnomnominal/tsquery';
 import './index.css';
 import { queryCode } from './engine';
 import QueryEditor from './QueryEditor';
 import Code, { HighlightedInterval, HighlightedIntervals } from './Code';
 import { isSyntaxError } from './tsquery-util';
 import Header from './Header';
+import Tree from './Tree';
 
 const REG_EXPS: Record<string, RegExp> = {
   AllLineBreaks: /\n/g,
@@ -52,7 +54,9 @@ const App: FC = () => {
     }
   }, [query, code]);
 
-  // Layout
+  /** @todo move */
+  const node = tsquery.ast(code, undefined, ScriptKind.JSX);
+
   return (
     <div className="App">
       <Header />
@@ -60,6 +64,8 @@ const App: FC = () => {
       <QueryEditor onChange={handleQueryChange} />
       <h2>Code</h2>
       <Code highlighted={highlightedIntervals} onChange={handleCodeChange} />
+      <h2>Tree</h2>
+      {node && <Tree node={node} />}
     </div>
   );
 };
