@@ -5,7 +5,7 @@ import './Tree.css';
 
 const Tree: FC<{ node: Node }> = ({ node }) => {
   return (
-    <pre>
+    <pre className="Tree">
       <TreeNode node={node} level={0} />
     </pre>
   );
@@ -16,30 +16,41 @@ export default Tree;
 const TreeNode: FC<{ node: Node; level: number }> = ({ node, level }) => {
   const [open, setOpen] = useState(false);
   const handleClick = useCallback(() => setOpen((open) => !open), []);
+  if (!open) {
+    return (
+      <span onClick={handleClick} className={classNames('toggable', { open })}>
+        <span className="nc">{SyntaxKind[node.kind]}</span>{' '}
+        <span className="p">
+          {'{'}
+          {Object.keys(node).slice(0, 5).join(', ')}
+          {')'}
+        </span>
+      </span>
+    );
+  }
   return (
     <>
       <span onClick={handleClick} className={classNames('toggable', { open })}>
         <span className="nc">{SyntaxKind[node.kind]}</span> <span className="p">{'{'}</span>
       </span>
-      {open &&
-        Object.entries(node).map(([key, value]) => {
-          if (key === 'parent') {
-            return null;
-          }
-          return (
-            <div key={key}>
-              {'\t'.repeat(level + 1)}
-              <PropertyName name={key} />:{' '}
-              {isNode(value) ? (
-                <TreeNode node={value} level={level + 1} />
-              ) : Array.isArray(value) ? (
-                <TreeNodeArray array={value} level={level + 1} />
-              ) : (
-                <PrimitiveValue value={value} />
-              )}
-            </div>
-          );
-        })}
+      {Object.entries(node).map(([key, value]) => {
+        if (key === 'parent') {
+          return null;
+        }
+        return (
+          <div key={key}>
+            {'\t'.repeat(level + 1)}
+            <PropertyName name={key} />:{' '}
+            {isNode(value) ? (
+              <TreeNode node={value} level={level + 1} />
+            ) : Array.isArray(value) ? (
+              <TreeNodeArray array={value} level={level + 1} />
+            ) : (
+              <PrimitiveValue value={value} />
+            )}
+          </div>
+        );
+      })}
       <span>
         {open && '\t'.repeat(level)}
         <span className="p">{'}'}</span>
@@ -53,6 +64,15 @@ const TreeNodeArray: FC<{ array: unknown[]; level: number }> = ({ array, level }
   const handleClick = useCallback(() => setOpen((open) => !open), []);
   if (!array.length) {
     return <span className="p">[]</span>;
+  }
+  if (!open) {
+    return (
+      <span onClick={handleClick} className={classNames('toggable', { open })}>
+        <span className="p">
+          [ {array.length} {array.length > 1 ? 'elements' : 'element'} ]
+        </span>
+      </span>
+    );
   }
   return (
     <>

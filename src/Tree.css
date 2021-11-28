@@ -1,3 +1,7 @@
+.Tree {
+  margin-left: 10px;
+}
+
 .toggable {
   position: relative;
 }
@@ -14,13 +18,13 @@
   color: pink;
 }
 
-.nc {
-  color: lightblue;
-}
-
-.nc:hover {
+.toggable:hover {
   text-decoration: underline;
   cursor: pointer;
+}
+
+.nc {
+  color: lightblue;
 }
 
 .nb {
