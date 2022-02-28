@@ -52,7 +52,7 @@
     "esquery": "1.4.0"
   },
   "devDependencies": {
-    "react-app-rewired": "2.1.8"
+    "react-app-rewired": "2.2.1"
   },
   "homepage": "https://tsquery-playground.netlify.app",
   "description": "Interactive playground for tsquery built with Monaco",
