@@ -10,7 +10,7 @@
     "@testing-library/user-event": "13.5.0",
     "@types/classnames": "2.3.1",
     "@types/esquery": "1.0.2",
-    "@types/jest": "26.0.24",
+    "@types/jest": "27.4.1",
     "@types/node": "12.20.46",
     "@types/react": "17.0.39",
     "@types/react-dom": "17.0.11",
