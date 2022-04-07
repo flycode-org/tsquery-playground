@@ -6,7 +6,7 @@
     "@monaco-editor/react": "4.4.1",
     "@phenomnomnominal/tsquery": "4.2.0",
     "@testing-library/jest-dom": "5.16.4",
-    "@testing-library/react": "12.1.4",
+    "@testing-library/react": "13.0.0",
     "@testing-library/user-event": "14.0.4",
     "@types/classnames": "2.3.1",
     "@types/esquery": "1.0.2",
