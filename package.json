@@ -12,7 +12,7 @@
     "@types/esquery": "1.0.2",
     "@types/jest": "27.4.1",
     "@types/node": "16.11.26",
-    "@types/react": "17.0.43",
+    "@types/react": "17.0.45",
     "@types/react-dom": "17.0.14",
     "classnames": "2.3.1",
     "esquery": "1.4.0",
