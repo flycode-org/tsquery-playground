@@ -1816,10 +1816,10 @@
     "@types/estree" "*"
     "@types/json-schema" "*"
 
-"@types/esquery@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@types/esquery/-/esquery-1.0.2.tgz#ccab4b6bd1aec356d5daa5b3abc55eac703c332d"
-  integrity sha512-qeAoHiWfqF4ST6An3DM2r1743bWL7B5hW4oNR9tWkdOjFUR1aK2j0jnYvW6h30VGDeXQ+1bWOYTej4JVo/5+PA==
+"@types/esquery@1.5.3":
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/@types/esquery/-/esquery-1.5.3.tgz#59fce2cdf351151bf5fe507cf78dc40c0f0af9b8"
+  integrity sha512-c55hQOcoPkWDfuEN9EdP1YyNH4D909U40gUEpY0nB5PWHExWHEPxcx3sx0fJ1Gzf4j1OpWktmIgciIlpgHtfDg==
   dependencies:
     "@types/estree" "*"
 
@@ -4850,10 +4850,10 @@ esprima@^4.0.0, esprima@^4.0.1:
   resolved "https://registry.yarnpkg.com/esprima/-/esprima-4.0.1.tgz#13b04cdb3e6c5d19df91ab6987a8695619b0aa71"
   integrity sha512-eGuFFw7Upda+g4p+QHvnW0RyTX/SVeJBDM/gCtMARO0cLuT2HcEKnTPvhjV6aGeqrCB/sbNop0Kszm0jsaWU4A==
 
-esquery@1.4.0, esquery@^1.0.1, esquery@^1.4.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/esquery/-/esquery-1.4.0.tgz#2148ffc38b82e8c7057dfed48425b3e61f0f24a5"
-  integrity sha512-cCDispWt5vHHtwMY2YrAQ4ibFkAL8RbH5YGBnZBc90MolvvfkkQcJro/aZiAQUlQ3qgrYS6D6v8Gc5G5CQsc9w==
+esquery@1.5.0, esquery@^1.0.1, esquery@^1.4.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/esquery/-/esquery-1.5.0.tgz#6ce17738de8577694edd7361c57182ac8cb0db0b"
+  integrity sha512-YQLXUplAwJgCydQ78IMJywZCceoqk1oH01OERdSAJc/7U2AylwjhSCLDEtqwg811idIS/9fIU5GjG73IgjKMVg==
   dependencies:
     estraverse "^5.1.0"
 

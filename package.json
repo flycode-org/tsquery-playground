@@ -9,13 +9,13 @@
     "@testing-library/react": "13.0.0",
     "@testing-library/user-event": "14.0.4",
     "@types/classnames": "2.3.1",
-    "@types/esquery": "1.0.2",
+    "@types/esquery": "1.5.3",
     "@types/jest": "27.4.1",
     "@types/node": "16.11.42",
     "@types/react": "18.0.9",
     "@types/react-dom": "17.0.17",
     "classnames": "2.3.1",
-    "esquery": "1.4.0",
+    "esquery": "1.5.0",
     "monaco-editor": "0.33.0",
     "prettier": "2.6.2",
     "react": "18.2.0",
@@ -49,7 +49,7 @@
     ]
   },
   "resolutions": {
-    "esquery": "1.4.0"
+    "esquery": "1.5.0"
   },
   "devDependencies": {
     "react-app-rewired": "2.2.1"
